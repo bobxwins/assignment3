@@ -603,11 +603,10 @@ namespace Assignment3TestSuite
         }
     }
 
-    /**********************************************************
-    * 
+    /**
     *  Helper Clases
     * 
-    **********************************************************/
+    ***/
 
     public static class Util
     {
@@ -615,8 +614,9 @@ namespace Assignment3TestSuite
         /*  public static void Main(string[] args)*/
         public static string ToJson(this object data)
         {
+           
 
-            var request = new
+             data = new
             {
                 Method = "update",
                 Path = "/api/categories/1",
@@ -626,7 +626,7 @@ namespace Assignment3TestSuite
             };
 
 
-            return JsonSerializer.Serialize(request, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+            return JsonSerializer.Serialize(data, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         }
 
         public static T FromJson<T>(this string element)
@@ -660,13 +660,13 @@ namespace Assignment3TestSuite
                     memStream.Write(resp, 0, bytesread);
 
                 } while (bytesread == 2048);
-                {
-                    var client = server.AcceptTcpClient();
+                
+                   /*var client = server.AcceptTcpClient(); */
                     Console.WriteLine("Accepted client!");
                     var responseData = Encoding.UTF8.GetString(memStream.ToArray());
                     return JsonSerializer.Deserialize<Response>(responseData, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
                 }
             }
         }
-    }
+    
 }
