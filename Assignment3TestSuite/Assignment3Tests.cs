@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Xunit;
-using System.Runtime.Serialization.Formatters.Binary;
 
 
 namespace Assignment3TestSuite
@@ -124,7 +124,7 @@ namespace Assignment3TestSuite
                 Method = "update",
                 Path = "testing",
                 Date = DateTimeOffset.Now.ToString(),
-                Body = (new { cid = 1, Name = "Beverages" }).ToJson()
+                Body = (new { cid = 1, Name = "Beverages"}).ToJson()
             };
 
             client.SendRequest(request.ToJson());
@@ -156,7 +156,7 @@ namespace Assignment3TestSuite
             Assert.Contains("missing body", response.Status.ToLower());
         }
 
-
+        
         [Fact]
         public void Constraint_RequestUpdateWithoutJsonBody_IllegalBodyError()
         {
@@ -220,7 +220,7 @@ namespace Assignment3TestSuite
 
             client.SendRequest(request.ToJson());
             var response = client.ReadResponse();
-
+            
             var expectedResponse = new Response { Status = "4 Bad Request" };
 
             Assert.Equal(expectedResponse.ToJson().ToLower(), response.ToJson().ToLower());
@@ -240,7 +240,7 @@ namespace Assignment3TestSuite
 
             client.SendRequest(request.ToJson());
             var response = client.ReadResponse();
-
+            
             var expectedResponse = new Response { Status = "4 Bad Request" };
 
             Assert.Equal(expectedResponse.ToJson().ToLower(), response.ToJson().ToLower());
@@ -261,7 +261,7 @@ namespace Assignment3TestSuite
 
             client.SendRequest(request.ToJson());
             var response = client.ReadResponse();
-
+            
             var expectedResponse = new Response { Status = "4 Bad Request" };
 
             Assert.Equal(expectedResponse.ToJson().ToLower(), response.ToJson().ToLower());
@@ -282,7 +282,7 @@ namespace Assignment3TestSuite
 
             client.SendRequest(request.ToJson());
             var response = client.ReadResponse();
-
+            
             var expectedResponse = new Response { Status = "4 Bad Request" };
 
             Assert.Equal(expectedResponse.ToJson().ToLower(), response.ToJson().ToLower());
@@ -302,7 +302,7 @@ namespace Assignment3TestSuite
 
             client.SendRequest(request.ToJson());
             var response = client.ReadResponse();
-
+            
             var expectedResponse = new Response { Status = "4 Bad Request" };
 
             Assert.Equal(expectedResponse.ToJson().ToLower(), response.ToJson().ToLower());
@@ -326,7 +326,7 @@ namespace Assignment3TestSuite
 
             client.SendRequest(request.ToJson());
             var response = client.ReadResponse();
-
+            
             var categories = new List<object>
             {
                 new {cid = 1, name = "Beverages"},
@@ -357,7 +357,7 @@ namespace Assignment3TestSuite
 
             client.SendRequest(request.ToJson());
             var response = client.ReadResponse();
-
+            
             var expectedResponse = new Response
             {
                 Status = "1 Ok",
@@ -591,41 +591,33 @@ namespace Assignment3TestSuite
         private static TcpClient Connect()
         {
             var client = new TcpClient();
-            client.Connect(IPAddress.Loopback, 5000);
+            client.Connect(IPAddress.Loopback, Port);
             return client;
         }
-        private static TcpListener Start()
-        {
-            var server = new TcpListener(IPAddress.Loopback, 5000);
-            server.Start();
-            return server;
 
-        }
+
+       
+        
     }
 
-    /**
+    /**********************************************************
+    * 
     *  Helper Clases
     * 
-    ***/
+    **********************************************************/
 
     public static class Util
     {
+        public static  string lol1 (this string we)
+        {
+            we = "sasd";
+              Console.WriteLine("Messagaaae from the server:");
+            return we;
+        }
 
-        /*  public static void Main(string[] args)*/
         public static string ToJson(this object data)
         {
-           
-
-             data = new
-            {
-                Method = "update",
-                Path = "/api/categories/1",
-                Date = "1434360957",
-                Body = (new { name = "AssignTest" }).ToJson()
-
-            };
-
-
+             
             return JsonSerializer.Serialize(data, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         }
 
@@ -636,18 +628,24 @@ namespace Assignment3TestSuite
 
         public static void SendRequest(this TcpClient client, string request)
         {
-
+            var data = new
+            {
+                Method = "update",
+                Path = "/api/categories/1",
+                Date = "1434360957",
+                Body = (new { name = "AssignTest" }).ToJson()
+            };
 
 
 
             var msg = Encoding.UTF8.GetBytes(request);
             client.GetStream().Write(msg, 0, msg.Length);
+            Console.WriteLine($"Message from the server: {msg}");
         }
 
         public static Response ReadResponse(this TcpClient client)
         {
-            var server = new TcpListener(IPAddress.Loopback, 5000);
-
+            
             var strm = client.GetStream();
             //strm.ReadTimeout = 250;
             byte[] resp = new byte[2048];
@@ -661,12 +659,11 @@ namespace Assignment3TestSuite
 
                 } while (bytesread == 2048);
                 
-                   /*var client = server.AcceptTcpClient(); */
-                    Console.WriteLine("Accepted client!");
-                    var responseData = Encoding.UTF8.GetString(memStream.ToArray());
-                    return JsonSerializer.Deserialize<Response>(responseData, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-                }
+                var responseData = Encoding.UTF8.GetString(memStream.ToArray());
+                return JsonSerializer.Deserialize<Response>(responseData, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase});
+            }
+
+            
             }
         }
-    
 }
