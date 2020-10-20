@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,17 +7,14 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Newtonsoft.Json;
 using Xunit;
 
 
-namespace XUnitTestProject1
+namespace XUnitTestProject
 {
 
     class Request
     {
-
-
         public string Method { get; set; }
         public string Path { get; set; }
         public int Date { get; set; }
@@ -28,49 +26,8 @@ namespace XUnitTestProject1
               return string.Format("Request information:\n\tMethod: {0}, Path: {1}, Date: {2} + Body {3}", Method,Path,Date,Body, string.Join(",",Body.ToArray()));
           } */
     }
-    class UnitTest1
-    {
 
-        static void Main(string[] args)
-        {
 
-            Request request = new Request()
-            {
-
-                Method = "update",
-                Path = "/api/categories/1",
-                Date = 1434360957,
-                Body = "1 AssignTest"
-            };
-
-            string Jsonrequest = JsonConvert.SerializeObject(request); // creates the method,path etc request, converts into json
-            File.WriteAllText(@"request.json", Jsonrequest); // creates a file of the json
-                                                             // Console.WriteLine(Jsonrequest); // prints the json into the console
-            Jsonrequest = String.Empty;
-            Jsonrequest = File.ReadAllText(@"request.json");
-            Request DeserializeJson = JsonConvert.DeserializeObject<Request>(Jsonrequest);
-            Console.WriteLine(DeserializeJson.ToString());
-
-            using var client = new TcpClient();
-            client.Connect(IPAddress.Loopback, 5000);
-
-            var stream = client.GetStream();
-
-            var data = Encoding.UTF8.GetBytes("Hello bob2" + Jsonrequest); // Json Object gets sent to the Server
-
-            stream.Write(data);
-
-            data = new byte[client.ReceiveBufferSize];
-
-            data = new byte[client.ReceiveBufferSize];
-
-            var cnt = stream.Read(data);
-
-            var msg = Encoding.UTF8.GetString(data, 0, cnt);
-
-            Console.WriteLine($"Message from the server: {msg}");
-        }
-    }
 
     public class Response
     {
@@ -93,16 +50,58 @@ namespace XUnitTestProject1
 
     }
 
-
-
-    public class Assignment3Tests
+    public class Assignment3Test
     {
+
+
         private const int Port = 5000;
+
+
 
         public static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Scooby Dooby Doo!");
+
+
+            var client = Connect();
+            Request request = new Request()
+            {
+
+                Method = "update",
+                Path = "/api/categories/1",
+                Date = 1434360957,
+                Body = "1 AssignTest"
+            };
+
+            string Jsonrequest = JsonConvert.SerializeObject(request); // creates the method,path etc request, converts into json
+            File.WriteAllText(@"request.json", Jsonrequest); // creates a file of the json
+                                                             // Console.WriteLine(Jsonrequest); // prints the json into the console
+            Jsonrequest = String.Empty;
+            Jsonrequest = File.ReadAllText(@"request.json");
+            Request DeserializeJson = JsonConvert.DeserializeObject<Request>(Jsonrequest);
+            Console.WriteLine(DeserializeJson.ToString());
+
+
+            var stream = client.GetStream();
+
+            var data = Encoding.UTF8.GetBytes("Hello Cool boby" + Jsonrequest); // Json Object gets sent to the Server
+
+            stream.Write(data);
+
+            data = new byte[client.ReceiveBufferSize];
+
+            data = new byte[client.ReceiveBufferSize];
+
+            var cnt = stream.Read(data);
+
+            var msg = Encoding.UTF8.GetString(data, 0, cnt);
+
+            Console.WriteLine($"Message from the server: {msg}");
+
         }
+
+
+
 
         //////////////////////////////////////////////////////////
         /// 
@@ -633,6 +632,7 @@ namespace XUnitTestProject1
         [Fact]
         public void Request_DeleteCategoryWithInvalidId_StatusNotFound()
         {
+
             var client = Connect();
             var verifyRequest = new
             {
@@ -655,15 +655,18 @@ namespace XUnitTestProject1
          * 
         **********************************************************/
 
+
         private static string UnixTimestamp()
         {
             return DateTimeOffset.Now.ToUnixTimeSeconds().ToString();
+
         }
 
-        public static TcpClient Connect()
+        private static TcpClient Connect()
         {
             var client = new TcpClient();
-            client.Connect(IPAddress.Loopback, Port);
+            client.Connect(IPAddress.Loopback, 5000);
+
             return client;
         }
 
@@ -682,17 +685,8 @@ namespace XUnitTestProject1
 
         public static string ToJson(this object data)
         {
-            return System.Text.Json.JsonSerializer.Serialize(data, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-        }
 
-        public static T FromJson<T>(this string element)
-        {
-            return System.Text.Json.JsonSerializer.Deserialize<T>(element, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-        }
-
-        public static void SendRequest(this TcpClient client, string request)
-        {
-            var data = new
+            data = new
             {
                 Method = "update",
                 Path = "/api/categories/1",
@@ -700,6 +694,19 @@ namespace XUnitTestProject1
                 Body = (new { name = "AssignTest" }).ToJson()
             };
 
+            return System.Text.Json.JsonSerializer.Serialize(data, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+
+        ;
+        }
+
+        public static T FromJson<T>(this string element)
+        {
+
+            return System.Text.Json.JsonSerializer.Deserialize<T>(element, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+        }
+
+        public static void SendRequest(this TcpClient client, string request)
+        {
 
 
             var msg = Encoding.UTF8.GetBytes(request);
@@ -710,7 +717,7 @@ namespace XUnitTestProject1
         {
 
 
-            var strm = client.GetStream();
+            var stream = client.GetStream();
             //strm.ReadTimeout = 250;
             byte[] resp = new byte[2048];
             using (var memStream = new MemoryStream())
@@ -718,7 +725,7 @@ namespace XUnitTestProject1
                 int bytesread = 0;
                 do
                 {
-                    bytesread = strm.Read(resp, 0, resp.Length);
+                    bytesread = stream.Read(resp, 0, resp.Length);
                     memStream.Write(resp, 0, bytesread);
 
                 } while (bytesread == 2048);
@@ -727,5 +734,6 @@ namespace XUnitTestProject1
                 return System.Text.Json.JsonSerializer.Deserialize<Response>(responseData, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
             }
         }
+
     }
 }

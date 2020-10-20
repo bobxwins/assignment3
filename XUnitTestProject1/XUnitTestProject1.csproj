@@ -5,7 +5,9 @@
 
     <IsPackable>false</IsPackable>
 
-    <StartupObject>XUnitTestProject1.UnitTest1</StartupObject>
+    <StartupObject>XUnitTestProject.Assignment3Test</StartupObject>
+
+    <OutputType>WinExe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
