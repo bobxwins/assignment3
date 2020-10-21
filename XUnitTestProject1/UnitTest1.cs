@@ -1,4 +1,3 @@
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,26 +7,10 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Xunit;
+ 
 
-
-namespace XUnitTestProject
+namespace Assignment3TestSuite
 {
-
-    class Request
-    {
-        public string Method { get; set; }
-        public string Path { get; set; }
-        public int Date { get; set; }
-        public string Body { get; set; }
-
-        /*  public override string ToString()
-          {
-
-              return string.Format("Request information:\n\tMethod: {0}, Path: {1}, Date: {2} + Body {3}", Method,Path,Date,Body, string.Join(",",Body.ToArray()));
-          } */
-    }
-
-
 
     public class Response
     {
@@ -37,70 +20,15 @@ namespace XUnitTestProject
 
     public class Category
     {
-
         [JsonPropertyName("cid")]
         public int Id { get; set; }
         [JsonPropertyName("name")]
         public string Name { get; set; }
-
-        static void Main(string[] args)
-        {
-            Console.WriteLine("Hello World!");
-        }
-
     }
 
-    public class Assignment3Test
+    public class Assignment3Tests
     {
-
-
         private const int Port = 5000;
-
-
-
-        public static void Main(string[] args)
-        {
-            Console.WriteLine("Scooby Dooby Doo!");
-
-
-            var client = Connect();
-            Request request = new Request()
-            {
-
-                Method = "update",
-                Path = "/api/categories/1",
-                Date = 1434360957,
-                Body = "1 AssignTest"
-            };
-
-            string Jsonrequest = JsonConvert.SerializeObject(request); // creates the method,path etc request, converts into json
-            File.WriteAllText(@"request.json", Jsonrequest); // creates a file of the json
-                                                             // Console.WriteLine(Jsonrequest); // prints the json into the console
-            Jsonrequest = String.Empty;
-            Jsonrequest = File.ReadAllText(@"request.json");
-            Request DeserializeJson = JsonConvert.DeserializeObject<Request>(Jsonrequest);
-            Console.WriteLine(DeserializeJson.ToString());
-
-
-            var stream = client.GetStream();
-
-            var data = Encoding.UTF8.GetBytes("Hello Cool boby" + Jsonrequest); // Json Object gets sent to the Server
-
-            stream.Write(data);
-
-            data = new byte[client.ReceiveBufferSize];
-
-            data = new byte[client.ReceiveBufferSize];
-
-            var cnt = stream.Read(data);
-
-            var msg = Encoding.UTF8.GetString(data, 0, cnt);
-
-            Console.WriteLine($"Message from the server: {msg}");
-
-        }
-
-
 
 
         //////////////////////////////////////////////////////////
@@ -632,7 +560,6 @@ namespace XUnitTestProject
         [Fact]
         public void Request_DeleteCategoryWithInvalidId_StatusNotFound()
         {
-
             var client = Connect();
             var verifyRequest = new
             {
@@ -655,69 +582,47 @@ namespace XUnitTestProject
          * 
         **********************************************************/
 
-
         private static string UnixTimestamp()
         {
             return DateTimeOffset.Now.ToUnixTimeSeconds().ToString();
-
         }
 
         private static TcpClient Connect()
         {
             var client = new TcpClient();
-            client.Connect(IPAddress.Loopback, 5000);
-
+            client.Connect(IPAddress.Loopback, Port);
             return client;
         }
 
     }
 
     /**********************************************************
-    *  
+    * 
     *  Helper Clases
     * 
     **********************************************************/
 
     public static class Util
     {
-
-
-
         public static string ToJson(this object data)
         {
-
-            data = new
-            {
-                Method = "update",
-                Path = "/api/categories/1",
-                Date = "1434360957",
-                Body = (new { name = "AssignTest" }).ToJson()
-            };
-
-            return System.Text.Json.JsonSerializer.Serialize(data, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
-
-        ;
+            return JsonSerializer.Serialize(data, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         }
 
         public static T FromJson<T>(this string element)
         {
-
-            return System.Text.Json.JsonSerializer.Deserialize<T>(element, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+            return JsonSerializer.Deserialize<T>(element, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         }
 
         public static void SendRequest(this TcpClient client, string request)
         {
-
-
             var msg = Encoding.UTF8.GetBytes(request);
             client.GetStream().Write(msg, 0, msg.Length);
         }
 
         public static Response ReadResponse(this TcpClient client)
         {
-
-
-            var stream = client.GetStream();
+            var strm = client.GetStream();
             //strm.ReadTimeout = 250;
             byte[] resp = new byte[2048];
             using (var memStream = new MemoryStream())
@@ -725,15 +630,14 @@ namespace XUnitTestProject
                 int bytesread = 0;
                 do
                 {
-                    bytesread = stream.Read(resp, 0, resp.Length);
+                    bytesread = strm.Read(resp, 0, resp.Length);
                     memStream.Write(resp, 0, bytesread);
 
                 } while (bytesread == 2048);
 
                 var responseData = Encoding.UTF8.GetString(memStream.ToArray());
-                return System.Text.Json.JsonSerializer.Deserialize<Response>(responseData, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+                return JsonSerializer.Deserialize<Response>(responseData, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
             }
         }
-
     }
 }

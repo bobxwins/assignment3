@@ -6,4 +6,8 @@
     <StartupObject>Server.ServerProgram</StartupObject>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\XUnitTestProject1\XUnitTestProject1.csproj" />
+  </ItemGroup>
+
 </Project>
